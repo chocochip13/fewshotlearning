@@ -34,7 +34,39 @@ class EmbeddingNet(nn.Module):
     def get_embedding(self, x):
         return self.forward(x)
 
+class EmbeddingNet128(nn.Module):
+    def __init__(self):
+        super(EmbeddingNet128, self).__init__()
+        self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2),
+                                     nn.Conv2d(32, 64, 5), nn.PReLU(),
+                                     nn.MaxPool2d(2, stride=2))
 
+        #self.fc = nn.Sequential(nn.Linear(64 * 4 * 4, 256),
+         #                       nn.PReLU(),
+          #                      nn.Linear(256, 256),
+           #                     nn.PReLU(),
+           #                     nn.Linear(256, 2)
+            #                    )
+        self.fc = nn.Sequential(nn.Linear(238144, 256),
+                                nn.PReLU(),
+                                nn.Linear(256, 256),
+                                nn.PReLU(),
+                                nn.Linear(256, 128)
+                                )
+
+    def forward(self, x):
+        output = self.convnet(x)
+        output = output.view(output.size()[0], -1)
+        #output = output.view(output.size(0), -1)
+   
+        output = self.fc(output)
+        return output
+
+    def get_embedding(self, x):
+        return self.forward(x)
+    
+    
 class EmbeddingNetL2(EmbeddingNet):
     def __init__(self):
         super(EmbeddingNetL2, self).__init__()

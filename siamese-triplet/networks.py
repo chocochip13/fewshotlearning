@@ -2,9 +2,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class EmbeddingNet(nn.Module):
+class EmbeddingNet2_bw(nn.Module):
     def __init__(self):
-        super(EmbeddingNet, self).__init__()
+        super(EmbeddingNet2_bw, self).__init__()
         self.convnet = nn.Sequential(nn.Conv2d(1, 32, 5), nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2),
                                      nn.Conv2d(32, 64, 5), nn.PReLU(),
@@ -35,9 +35,9 @@ class EmbeddingNet(nn.Module):
         return self.forward(x)
     
     
-class EmbeddingNet_2_3(nn.Module):
+class EmbeddingNet2_RGB(nn.Module):
     def __init__(self):
-        super(EmbeddingNet, self).__init__()
+        super(EmbeddingNet2_RGB, self).__init__()
         self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2),
                                      nn.Conv2d(32, 64, 5), nn.PReLU(),
@@ -68,9 +68,9 @@ class EmbeddingNet_2_3(nn.Module):
         return self.forward(x)
     
     
-class EmbeddingNet128(nn.Module):
+class EmbeddingNet128_bw(nn.Module):
     def __init__(self):
-        super(EmbeddingNet128, self).__init__()
+        super(EmbeddingNet128_bw, self).__init__()
         self.convnet = nn.Sequential(nn.Conv2d(1, 32, 5), nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2),
                                      nn.Conv2d(32, 64, 5), nn.PReLU(),
@@ -101,9 +101,9 @@ class EmbeddingNet128(nn.Module):
         return self.forward(x)
     
 
-class EmbeddingNet128_3(nn.Module):
+class EmbeddingNet128_RGB(nn.Module):
     def __init__(self):
-        super(EmbeddingNet128, self).__init__()
+        super(EmbeddingNet128_RGB, self).__init__()
         self.convnet = nn.Sequential(nn.Conv2d(3, 32, 5), nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2),
                                      nn.Conv2d(32, 64, 5), nn.PReLU(),
@@ -134,7 +134,7 @@ class EmbeddingNet128_3(nn.Module):
         return self.forward(x)
     
     
-class EmbeddingNetL2(EmbeddingNet):
+class EmbeddingNetL2(EmbeddingNet2_bw):
     def __init__(self):
         super(EmbeddingNetL2, self).__init__()
 

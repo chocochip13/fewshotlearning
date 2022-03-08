@@ -1,7 +1,96 @@
 from itertools import combinations
+from torchvision import datasets
 
 import numpy as np
 import torch
+import os
+
+import matplotlib.pyplot as plt
+cuda = torch.cuda.is_available()
+
+
+def seed_torch(seed=13):
+    # random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)  # as reproducibility docs
+    torch.manual_seed(seed)  # as reproducibility docs
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False  # as reproducibility docs
+    torch.backends.cudnn.deterministic = True  # as reproducibility docs
+
+
+def load_training(root_path, dir, transform, batch_size, **kwargs):
+    """
+    Argument:
+    root_path -- root path of the data
+    dir       -- train/test/validation directory
+    batch_size-- batch size
+
+    Returns:
+    data_loader       -- data loader from Imagefolder in Pytorch
+    data              -- Images dataset
+    data.class_to_idx -- maps name of each class to index
+    data.classes      -- classes present in the dataset
+    """
+    # transform = transforms.Compose(
+    #   [transforms.Resize([256, 256]),
+    #   transforms.Grayscale(num_output_channels=1),
+    #  transforms.ToTensor()])
+    data = datasets.ImageFolder(root=root_path + dir, transform=transform)
+    data_loader = torch.utils.data.DataLoader(data, batch_size=batch_size, shuffle=False, drop_last=False,
+                                              worker_init_fn=seed_torch, **kwargs)
+    return data_loader, data, data.class_to_idx, data.classes
+
+
+colors = ['#1f77b4', '#FF4040']
+
+
+# Plot embedding
+def plot_embeddings(embeddings, targets, classes, xlim=None, ylim=None):
+    plt.figure(figsize=(10, 10))
+    for i in range(2):
+        inds = np.where(targets == i)[0]
+        plt.scatter(embeddings[inds, 0], embeddings[inds, 1], alpha=0.5, color=colors[i])
+    if xlim:
+        plt.xlim(xlim[0], xlim[1])
+    if ylim:
+        plt.ylim(ylim[0], ylim[1])
+    plt.legend(classes)
+
+
+# Extracts image embeddings from dataloader
+def extract_embeddings(dataloader, model, embedding_len):
+    """"
+    Arguments:
+    dataloader -- Dataloader of the images
+    model      -- Trained model
+
+    Returns:
+    embeddings -- resulting embeddings of images from the model
+    labels     -- labels of the images/embeddings
+
+    """
+    with torch.no_grad():
+        model.eval()
+        embeddings = np.zeros((len(dataloader.dataset), embedding_len))
+        labels = np.zeros(len(dataloader.dataset))
+        k = 0
+        for images, target in dataloader:
+            if cuda:
+                images = images.cuda()
+            embeddings[k:k + len(images)] = model.get_embedding(images).data.cpu().numpy()
+            labels[k:k + len(images)] = target.numpy()
+            k += len(images)
+    return embeddings, labels
+
+
+def dot(A, B):
+    return sum(a * b for a, b in zip(A, B))
+
+
+def cosine_similarity(a, b):
+    return dot(a, b) / ((dot(a, a) ** .5) * (dot(b, b) ** .5))
 
 
 def pdist(vectors):
